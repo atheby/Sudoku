@@ -48,7 +48,7 @@ public class Square extends Button {
 
     private void setStyle() {
         setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareText));
-        setBackgroundColor(getResources().getColor(R.color.colorSquareBackground));
+        setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorSquareBackground));
     }
 
     public int getRow() {
