@@ -57,6 +57,7 @@ public class GameActivity extends AppCompatActivity {
         return new OnClickListener() {
             public void onClick(View v) {
                 sqr.increment();
+                checkResult();
             }
         };
     }
@@ -122,6 +123,25 @@ public class GameActivity extends AppCompatActivity {
                     numbers.set(y, tempRow);
                 }
             }
+        }
+    }
+
+    private void checkResult() {
+        List<Square> duplicates = new ArrayList<>();
+        for(Square sqr1: squares) {
+            for(Square sqr2: squares) {
+                if(sqr1.equals(sqr2))
+                    continue;
+                if(sqr1.getRow() == sqr2.getRow() && sqr1.getLabel() == sqr2.getLabel() ||
+                        sqr1.getColumn() == sqr2.getColumn() && sqr1.getLabel() == sqr2.getLabel())
+                    duplicates.add(sqr1);
+            }
+        }
+        for(Square sqr: squares) {
+            if (duplicates.contains(sqr))
+                sqr.setDuplicate(true);
+            else
+                sqr.setDuplicate(false);
         }
     }
 

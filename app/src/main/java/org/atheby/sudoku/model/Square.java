@@ -1,6 +1,7 @@
 package org.atheby.sudoku.model;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.widget.Button;
 import org.atheby.sudoku.R;
 
@@ -32,7 +33,21 @@ public class Square extends Button {
         setLabel(label);
     }
 
+    public void setDuplicate(Boolean duplicate) {
+        if(duplicate)
+            if(isClickable())
+                setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareTextDuplicateClickable));
+            else
+                setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareTextDuplicate));
+        else
+            if(isClickable())
+                setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareTextClickable));
+            else
+                setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareText));
+    }
+
     private void setStyle() {
+        setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareText));
         setBackgroundColor(getResources().getColor(R.color.colorSquareBackground));
     }
 
