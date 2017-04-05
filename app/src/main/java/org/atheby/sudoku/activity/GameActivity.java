@@ -3,7 +3,10 @@ package org.atheby.sudoku.activity;
 import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
@@ -22,6 +25,7 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         initNumbers();
+        shuffle(5);
         createGrid();
     }
 
@@ -39,11 +43,20 @@ public class GameActivity extends AppCompatActivity {
                 squareWrapperLayout.setLayoutParams(squareWrapperParams);
                 Square sqr = new Square(this, row, col);
                 sqr.setLabel(numbers.get(row).get(col));
+                sqr.setOnClickListener(squareOnClick(sqr));
                 squareWrapperLayout.addView(sqr);
                 squareWrapperLayout.setPadding(2, 2, 2, 2);
                 gridLayout.addView(squareWrapperLayout);
             }
         }
+    }
+
+    private OnClickListener squareOnClick(final Square sqr)  {
+        return new OnClickListener() {
+            public void onClick(View v) {
+                Log.i("GameActivity", ((Integer)sqr.getLabel()).toString());
+            }
+        };
     }
 
     private void initNumbers() {
@@ -68,10 +81,46 @@ public class GameActivity extends AppCompatActivity {
         numbers.add(r8);
     }
 
+    private void shuffle(int iterations) {
+        int[][] groups = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
+        List<Integer> tempRow;
+        for(int i = 0; i < iterations; i++) {
+            for(int x = 0; x < iterations; x++) {
+                int row1, row2, group = getRandom(0, 2);
+                do {
+                    row1 = groups[group][getRandom(0, 2)];
+                    row2 = groups[group][getRandom(0, 2)];
+                } while(row1 == row2);
+                tempRow = numbers.get(row1);
+                numbers.set(row1, numbers.get(row2));
+                numbers.set(row2, tempRow);
+            }
+            for(int x = 0; x < iterations; x++) {
+                int tempNum, col1, col2, group = getRandom(0, 2);
+                do {
+                    col1 = groups[group][getRandom(0, 2)];
+                    col2 = groups[group][getRandom(0, 2)];
+                } while(col1 == col2);
+                for(int y = 0; y < 9; y++) {
+                    tempRow = numbers.get(y);
+                    tempNum = tempRow.get(col1);
+                    tempRow.set(col1, tempRow.get(col2));
+                    tempRow.set(col2, tempNum);
+                    numbers.set(y, tempRow);
+                }
+            }
+        }
+    }
+
     private int getScreenWidth() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         return size.x < size.y ? size.x : size.y;
+    }
+
+    private int getRandom(int min, int max) {
+        Random r = new Random();
+        return r.nextInt(max - min + 1) + min;
     }
 }
