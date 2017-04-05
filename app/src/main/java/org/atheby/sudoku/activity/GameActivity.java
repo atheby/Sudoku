@@ -3,7 +3,6 @@ package org.atheby.sudoku.activity;
 import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,6 +18,7 @@ import java.util.*;
 public class GameActivity extends AppCompatActivity {
 
     private List<List<Integer>> numbers;
+    private List<Square> squares;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +27,7 @@ public class GameActivity extends AppCompatActivity {
         initNumbers();
         shuffle(5);
         createGrid();
+        squaresTurnOn(30);
     }
 
     private void createGrid() {
@@ -37,13 +38,14 @@ public class GameActivity extends AppCompatActivity {
         int squareSize = getScreenWidth() / 9;
         squareWrapperParams.height = squareSize;
         squareWrapperParams.width = squareSize;
+        squares = new ArrayList<>();
         for(int row = 0; row < 9; row++) {
             for (int col = 0; col < 9; col++) {
                 squareWrapperLayout = new LinearLayout(this);
                 squareWrapperLayout.setLayoutParams(squareWrapperParams);
                 Square sqr = new Square(this, row, col);
                 sqr.setLabel(numbers.get(row).get(col));
-                sqr.setOnClickListener(squareOnClick(sqr));
+                squares.add(sqr);
                 squareWrapperLayout.addView(sqr);
                 squareWrapperLayout.setPadding(2, 2, 2, 2);
                 gridLayout.addView(squareWrapperLayout);
@@ -54,9 +56,20 @@ public class GameActivity extends AppCompatActivity {
     private OnClickListener squareOnClick(final Square sqr)  {
         return new OnClickListener() {
             public void onClick(View v) {
-                Log.i("GameActivity", ((Integer)sqr.getLabel()).toString());
+                sqr.increment();
             }
         };
+    }
+
+    private void squaresTurnOn(int toTurnOn) {
+        do {
+            Square sqr = squares.get(getRandom(0, squares.size() - 1));
+            if(!sqr.isClickable()) {
+                sqr.turnOn();
+                sqr.setOnClickListener(squareOnClick(sqr));
+                toTurnOn--;
+            }
+        } while(toTurnOn != 0);
     }
 
     private void initNumbers() {

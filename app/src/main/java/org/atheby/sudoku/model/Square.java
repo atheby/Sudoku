@@ -15,7 +15,21 @@ public class Square extends Button {
         super(context);
         this.row = row;
         this.column = col;
+        setClickable(false);
         setStyle();
+    }
+
+    public void turnOn() {
+        setClickable(true);
+        setLabel(0);
+    }
+
+    public void increment() {
+        if(label < 9)
+            label++;
+        else
+            label = 0;
+        setLabel(label);
     }
 
     private void setStyle() {
