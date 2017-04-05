@@ -3,4 +3,10 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorSquareBackground">#fff6ed</color>
+    <color name="colorSquareBackgroundDark">#ffe7ce</color>
+    <color name="colorSquareText">#83613d</color>
+    <color name="colorSquareTextClickable">#352718</color>
+    <color name="colorSquareTextDuplicate">#ae0006</color>
+    <color name="colorSquareTextDuplicateClickable">#ff0000</color>
 </resources>
