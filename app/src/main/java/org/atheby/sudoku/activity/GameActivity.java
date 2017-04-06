@@ -1,5 +1,7 @@
 package org.atheby.sudoku.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,9 +27,14 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         initNumbers();
-        shuffle(5);
         createGrid();
-        squaresTurnOn(30);
+        newGame();
+    }
+
+    private void newGame() {
+        shuffle(5);
+        setDefaultState();
+        randomSquaresTurnOn(30);
     }
 
     private void createGrid() {
@@ -39,17 +46,30 @@ public class GameActivity extends AppCompatActivity {
         squareWrapperParams.height = squareSize;
         squareWrapperParams.width = squareSize;
         squares = new ArrayList<>();
+        int rowCounter = 0;
         for(int row = 0; row < 9; row++) {
+            if(row % 3 == 0 && row != 0)
+                rowCounter += 3;
+            int colCounter = 0;
             for (int col = 0; col < 9; col++) {
+                if(col % 3 == 0 && col != 0)
+                    colCounter++;
                 squareWrapperLayout = new LinearLayout(this);
                 squareWrapperLayout.setLayoutParams(squareWrapperParams);
-                Square sqr = new Square(this, row, col);
-                sqr.setLabel(numbers.get(row).get(col));
+                Square sqr = new Square(this, row, col, rowCounter + colCounter);
                 squares.add(sqr);
                 squareWrapperLayout.addView(sqr);
                 squareWrapperLayout.setPadding(2, 2, 2, 2);
                 gridLayout.addView(squareWrapperLayout);
             }
+        }
+    }
+
+    private void setDefaultState() {
+        for(Square sqr: squares) {
+            sqr.setLabel(numbers.get(sqr.getRow()).get(sqr.getColumn()));
+            sqr.setClickable(false);
+            sqr.setDefaultTextColor();
         }
     }
 
@@ -62,7 +82,7 @@ public class GameActivity extends AppCompatActivity {
         };
     }
 
-    private void squaresTurnOn(int toTurnOn) {
+    private void randomSquaresTurnOn(int toTurnOn) {
         do {
             Square sqr = squares.get(getRandom(0, squares.size() - 1));
             if(!sqr.isClickable()) {
@@ -71,6 +91,11 @@ public class GameActivity extends AppCompatActivity {
                 toTurnOn--;
             }
         } while(toTurnOn != 0);
+    }
+
+    private void squaresTurnOff() {
+        for(Square sqr: squares)
+            sqr.setClickable(false);
     }
 
     private void initNumbers() {
@@ -133,16 +158,45 @@ public class GameActivity extends AppCompatActivity {
                 if(sqr1.equals(sqr2))
                     continue;
                 if(sqr1.getRow() == sqr2.getRow() && sqr1.getLabel() == sqr2.getLabel() ||
-                        sqr1.getColumn() == sqr2.getColumn() && sqr1.getLabel() == sqr2.getLabel())
+                        sqr1.getColumn() == sqr2.getColumn() && sqr1.getLabel() == sqr2.getLabel() ||
+                        sqr1.getGroup() == sqr2.getGroup() && sqr1.getLabel() == sqr2.getLabel())
                     duplicates.add(sqr1);
             }
         }
+        boolean isFinished = true;
         for(Square sqr: squares) {
+            if(sqr.getLabel() == 0)
+                isFinished = false;
             if (duplicates.contains(sqr))
                 sqr.setDuplicate(true);
             else
                 sqr.setDuplicate(false);
         }
+        if(duplicates.size() == 0 && isFinished)
+            showGameOverDialog();
+    }
+
+    private void showGameOverDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Game finished");
+        builder.setCancelable(false);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+                squaresTurnOff();
+            }
+        });
+
+        builder.setNegativeButton("New Game", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+                newGame();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private int getScreenWidth() {

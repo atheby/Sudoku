@@ -9,13 +9,15 @@ public class Square extends Button {
 
     private int row;
     private int column;
+    private int group;
     private int label;
     private String[] labels= {"", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
-    public Square(Context context, int row, int col) {
+    public Square(Context context, int row, int col, int group) {
         super(context);
         this.row = row;
         this.column = col;
+        this.group = group;
         setClickable(false);
         setStyle();
     }
@@ -47,8 +49,14 @@ public class Square extends Button {
     }
 
     private void setStyle() {
+        setPadding(0, 0, 0, 0);
+        setTextSize(25);
         setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareText));
         setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorSquareBackground));
+    }
+
+    public void setDefaultTextColor() {
+        setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareText));
     }
 
     public int getRow() {
@@ -65,6 +73,14 @@ public class Square extends Button {
 
     public void setColumn(int column) {
         this.column = column;
+    }
+
+    public int getGroup() {
+        return group;
+    }
+
+    public void setGroup(int group) {
+        this.group = group;
     }
 
     public int getLabel() {
