@@ -1,40 +1,123 @@
 package org.atheby.sudoku.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Point;
-import android.support.v7.app.AppCompatActivity;
+import android.os.SystemClock;
 import android.os.Bundle;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.GridLayout;
-import android.widget.LinearLayout;
+import android.widget.*;
 import android.widget.LinearLayout.LayoutParams;
 import org.atheby.sudoku.R;
 import org.atheby.sudoku.model.Square;
 
 import java.util.*;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends Activity {
 
+    private LinearLayout gameLayout;
     private List<List<Integer>> numbers;
     private List<Square> squares;
+    private Chronometer chronometer;
+    private long time;
+    private TextView movesCounter;
+    private int moves;
+    private String level;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+        level = getIntent().getStringExtra("level");
+        gameLayout = (LinearLayout) findViewById(R.id.gameLayout);
         initNumbers();
+        createTopLayout();
         createGrid();
+        createBottomLayout();
         newGame();
     }
 
     private void newGame() {
         shuffle(5);
         setDefaultState();
-        randomSquaresTurnOn(30);
+        switch(level) {
+            case "easy":
+                randomSquaresTurnOn(5);
+                break;
+            case "medium":
+                randomSquaresTurnOn(40);
+                break;
+            case "hard":
+                randomSquaresTurnOn(45);
+                break;
+        }
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer.start();
+    }
+
+    private void reset() {
+        for(Square sqr: squares) {
+            if (sqr.isClickable())
+                sqr.setLabel(0);
+            sqr.setDefaultTextColor();
+        }
+    }
+
+    private void createTopLayout() {
+        LinearLayout topLayout = new LinearLayout(this);
+        topLayout.setPadding(30, 10, 30, 10);
+        TextView movesLabel = new TextView(this);
+        movesLabel.setText("Moves:");
+        movesLabel.setTextSize(20);
+        movesLabel.setTextColor(Color.WHITE);
+        movesCounter = new TextView(this);
+        movesCounter.setTextSize(20);
+        movesCounter.setTextColor(Color.WHITE);
+        movesCounter.setPadding(20, 0, 20, 0);
+        chronometer = new Chronometer(this);
+        chronometer.setTextSize(20);
+        chronometer.setTextColor(Color.WHITE);
+        chronometer.setPadding(20, 0, 20, 0);
+        topLayout.addView(movesLabel);
+        topLayout.addView(movesCounter);
+        topLayout.addView(chronometer);
+        gameLayout.addView(topLayout, 0);
+    }
+
+    private void createBottomLayout() {
+        LinearLayout buttonsLayout = new LinearLayout(this);
+        LayoutParams params =
+                new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.gravity = Gravity.CENTER_HORIZONTAL;
+        buttonsLayout.setLayoutParams(params);
+        Button resetBtn = new Button(this);
+        resetBtn.setText("Reset");
+        Button newGameBtn = new Button(this);
+        newGameBtn.setText("New game");
+        resetBtn.setLayoutParams(params);
+        newGameBtn.setLayoutParams(params);
+        buttonsLayout.addView(resetBtn);
+        buttonsLayout.addView(newGameBtn);
+        gameLayout.addView(buttonsLayout);
+        newGameBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                newGame();
+            }
+        });
+        resetBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reset();
+            }
+        });
     }
 
     private void createGrid() {
@@ -66,6 +149,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setDefaultState() {
+        moves = 0;
+        movesCounter.setText(((Integer) moves).toString());
         for(Square sqr: squares) {
             sqr.setLabel(numbers.get(sqr.getRow()).get(sqr.getColumn()));
             sqr.setClickable(false);
@@ -77,6 +162,7 @@ public class GameActivity extends AppCompatActivity {
         return new OnClickListener() {
             public void onClick(View v) {
                 sqr.increment();
+                incrementMoves();
                 checkResult();
             }
         };
@@ -167,13 +253,17 @@ public class GameActivity extends AppCompatActivity {
         for(Square sqr: squares) {
             if(sqr.getLabel() == 0)
                 isFinished = false;
-            if (duplicates.contains(sqr))
+            if (duplicates.contains(sqr) && !level.equals("hard"))
                 sqr.setDuplicate(true);
             else
                 sqr.setDuplicate(false);
         }
-        if(duplicates.size() == 0 && isFinished)
+        if(duplicates.size() == 0 && isFinished) {
+            chronometer.stop();
+            time = (SystemClock.elapsedRealtime() - chronometer.getBase()) / 1000;
+            squaresTurnOff();
             showGameOverDialog();
+        }
     }
 
     private void showGameOverDialog() {
@@ -184,19 +274,22 @@ public class GameActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.cancel();
-                squaresTurnOff();
-            }
-        });
-
-        builder.setNegativeButton("New Game", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.cancel();
-                newGame();
+                Intent intent = new Intent(GameActivity.this, ScoresActivity.class);
+                intent.putExtra("level", getIntent().getStringExtra("level"));
+                intent.putExtra("userName", getIntent().getStringExtra("userName"));
+                intent.putExtra("moves", movesCounter.getText());
+                intent.putExtra("time", ((Long) time).toString());
+                startActivity(intent);
             }
         });
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void incrementMoves() {
+        moves++;
+        movesCounter.setText(((Integer) moves).toString());
     }
 
     private int getScreenWidth() {
