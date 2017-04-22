@@ -49,7 +49,7 @@ public class GameActivity extends Activity {
         setDefaultState();
         switch(level) {
             case "easy":
-                randomSquaresTurnOn(5);
+                randomSquaresTurnOn(35);
                 break;
             case "medium":
                 randomSquaresTurnOn(40);
