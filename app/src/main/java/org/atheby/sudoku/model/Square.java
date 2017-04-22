@@ -52,7 +52,10 @@ public class Square extends Button {
         setPadding(0, 0, 0, 0);
         setTextSize(25);
         setTextColor(ContextCompat.getColor(getContext(), R.color.colorSquareText));
-        setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorSquareBackground));
+        if(group % 2 == 0)
+            setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorSquareBackground));
+        else
+            setBackgroundColor(ContextCompat.getColor(getContext(), R.color.colorSquareBackgroundDark));
     }
 
     public void setDefaultTextColor() {
