@@ -1,0 +1,23 @@
+# --table-start--
+dataClass=org.atheby.sudoku.model.Score
+tableName=score
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=userName
+# --field-end--
+# --field-start--
+fieldName=moves
+# --field-end--
+# --field-start--
+fieldName=time
+# --field-end--
+# --field-start--
+fieldName=level
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
